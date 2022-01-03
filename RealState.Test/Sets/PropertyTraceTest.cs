@@ -12,21 +12,21 @@ using Xunit;
 namespace RealState.Test.Sets
 {
     [TestCaseOrderer("RealState.Test.AlphabeticalOrderer", "RealState.Test")]
-    public class PropertyImageTest : IClassFixture<ServiceFixture>
+    public class PropertyTraceTest : IClassFixture<ServiceFixture>
     {
         private readonly ServiceProvider _serviceProvider;
 
-        private readonly GenericService<PropertyImage> _service;
+        private readonly GenericService<PropertyTrace> _service;
 
         private readonly GenericService<Property> _propertyService;
 
         private readonly GenericService<Owner> _ownerService;
 
-        public PropertyImageTest(ServiceFixture serviceFixture)
+        public PropertyTraceTest(ServiceFixture serviceFixture)
         {
             _serviceProvider = serviceFixture.ServiceProvider;
-            _service = (GenericService<PropertyImage>)_serviceProvider.GetService(
-                typeof(IGenericService<PropertyImage>));
+            _service = (GenericService<PropertyTrace>)_serviceProvider.GetService(
+                typeof(IGenericService<PropertyTrace>));
             _propertyService = (GenericService<Property>)_serviceProvider.GetService(
                 typeof(IGenericService<Property>));
             _ownerService = (GenericService<Owner>)_serviceProvider.GetService(
@@ -45,7 +45,7 @@ namespace RealState.Test.Sets
 
             Assert.True(result.Status);
 
-            result = (Response)await _ownerService.GetAll(1, 10);
+            result = (Response)await _ownerService.GetAll(1, 1);
 
             Assert.True(result.Status);
 
@@ -62,15 +62,17 @@ namespace RealState.Test.Sets
 
             Assert.True(result.Status);
 
-            result = (Response)await _propertyService.GetAll(1, 10);
+            result = (Response)await _propertyService.GetAll(1, 1);
 
             Assert.True(result.Status);
 
             result =
-                (Response)await _service.Insert(new PropertyImage()
+                (Response)await _service.Insert(new PropertyTrace()
                 {
-                    File = new byte[] { 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20 },
-                    Enabled = true,
+                    Name = "Test Property Trace",
+                    Tax = 10.85,
+                    Value = 502000.25,
+                    DateSale = DateTime.Now.AddDays(7),
                     PropertyId = ((IEnumerable<Property>)result.Content).First().Id
                 });
 
@@ -80,39 +82,38 @@ namespace RealState.Test.Sets
         [Fact]
         public async Task _2Get()
         {
-            Response result = (Response)await _service.GetAll(1, 10);
+            Response result = (Response)await _service.GetAll(1, 1);
             Assert.True(result.Status);
-            Assert.True((result.Content as IEnumerable<PropertyImage>).Any());
-            result = (Response)await _service.GetById((result.Content as IEnumerable<PropertyImage>).First().Id);
+            Assert.True((result.Content as IEnumerable<PropertyTrace>).Any());
+            result = (Response)await _service.GetById((result.Content as IEnumerable<PropertyTrace>).First().Id);
             Assert.True(result.Status);
         }
 
         [Fact]
         public async Task _3Update()
         {
-            Response result = (Response)await _service.GetAll(1, 10);
+            Response result = (Response)await _service.GetAll(1, 1);
             Assert.True(result.Status);
-            Assert.True((result.Content as IEnumerable<PropertyImage>).Any());
-            PropertyImage propertyImage =((IEnumerable<PropertyImage>)result.Content).First();
-            Assert.NotNull(propertyImage);
-            propertyImage.Enabled = false;
-            result = (Response)await _service.Update(propertyImage);
+            Assert.True((result.Content as IEnumerable<PropertyTrace>).Any());
+            PropertyTrace propertyTrace = ((IEnumerable<PropertyTrace>)result.Content).First();
+            Assert.NotNull(propertyTrace);
+            propertyTrace.Name = "Test Property Trace Updated";
+            result = (Response)await _service.Update(propertyTrace);
             Assert.True(result.Status);
         }
 
         [Fact]
         public async Task _4Delete()
         {
-            Response result = (Response)await _service.GetAll(1, 10);
+            Response result = (Response)await _service.GetAll(1, 1);
             Assert.True(result.Status);
-            Assert.True((result.Content as IEnumerable<PropertyImage>).Any());
-            PropertyImage propertyImage = (result.Content as IEnumerable<PropertyImage>).First();
-            result = (Response)await _service.Delete(propertyImage.Id);
+            Assert.True((result.Content as IEnumerable<PropertyTrace>).Any());
+            PropertyTrace propertyTrace = (result.Content as IEnumerable<PropertyTrace>).First();
+            result = (Response)await _service.Delete(propertyTrace.Id);
             Assert.True(result.Status);
 
-            result = (Response)await _propertyService.Delete(propertyImage.PropertyId);
+            result = (Response)await _propertyService.Delete(propertyTrace.PropertyId);
             Assert.True(result.Status);
         }
-
     }
 }
